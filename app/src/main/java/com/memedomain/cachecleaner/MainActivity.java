@@ -65,56 +65,65 @@ public class MainActivity extends AppCompatActivity {
         Intent mainIntent = new Intent(Intent.ACTION_MAIN, null);
         mainIntent.addCategory(Intent.CATEGORY_LAUNCHER);
         infos = getPackageManager().queryIntentActivities(mainIntent, 0);
+        showToast("Number of apps: " + infos.size());
 
         mAdapter = new RecyclerVievAdapted(appStructs, MainActivity.this);
         mLayoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(mLayoutManager);
         mRecyclerView.setAdapter(mAdapter);
 
-//        StorageInformation storageInformation = new StorageInformation(this);
-//        storageInformation.getpackageSize();
-
     }
 
     private synchronized void updateAppStructs() throws InterruptedException {
-        PackageManager pm = getPackageManager();
-        try {
-            Method getPackageSizeInfo = pm.getClass().getMethod(
-                    "getPackageSizeInfo", String.class, IPackageStatsObserver.class);
-            progressStatus = 0;
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                appStructs.clear();
+                PackageManager pm = getPackageManager();
+                try {
+                    Method getPackageSizeInfo = pm.getClass().getMethod(
+                            "getPackageSizeInfo", String.class, IPackageStatsObserver.class);
+                    progressStatus = 0;
 
-            progressBar.setProgress(progressStatus);
-//            while (progressStatus < infos.size()) {
-//                progressBar.setProgress(progressStatus);
-            for (final ResolveInfo inf : infos) {
-                getPackageSizeInfo.invoke(pm, inf.activityInfo.packageName, new IPackageStatsObserver.Stub() {
-                    @Override
-                    public void onGetStatsCompleted(PackageStats pStats, boolean succeeded) {
+//                    progressBar.setProgress(progressStatus);
+                    progressBar.setProgress(progressStatus);
+                    for (final ResolveInfo inf : infos) {
+                        getPackageSizeInfo.invoke(pm, inf.activityInfo.packageName, new IPackageStatsObserver.Stub() {
+                            @Override
+                            public void onGetStatsCompleted(PackageStats pStats, boolean succeeded) {
 
-                        AppStruct app = new AppStruct();
-                        app.cacheSize = pStats.cacheSize;
-                        app.info = inf;
-                        if (pStats.cacheSize > 0) {
-                            Log.d(TAG, "onGetStatsCompleted: After add");
-                            appStructs.add(app);
-                        }
-                        if (i >= infos.size()) {
-                            Log.d(TAG, "onGetStatsCompleted: Notified all " + i);
-                            notifyAll();
-                        }
-                        i++;
-                        progressStatus++;
+                                i++;
+                                AppStruct app = new AppStruct();
+                                app.cacheSize = pStats.cacheSize;
+                                app.info = inf;
+                                if (pStats.cacheSize > 0) {
+                                    Log.d(TAG, "onGetStatsCompleted: After add");
+                                    appStructs.add(app);
+                                }
+                                if (i >= infos.size()) {
+                                    Log.d(TAG, "onGetStatsCompleted: Notified all " + i);
+                                }
+                                progressStatus++;
+                            }
+                        });
                     }
+                    while (i < infos.size()) {
+                        Thread.sleep(10);
+                    }
+                    i = 0;
+                    Collections.sort(appStructs);
+                    mAdapter.notifyDataSetChanged();
 
-                });
+
+                } catch (NoSuchMethodException | SecurityException | IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
+                    Log.e(TAG, "updateAppStructs: ", e);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
             }
-            wait(2000);
-//                Thread.sleep(200);
-//            }
 
-        } catch (NoSuchMethodException | SecurityException | IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
-            Log.e(TAG, "updateAppStructs: ", e);
-        }
+        });
         Collections.sort(appStructs);
         Log.d(TAG, "updateAppStructs: ");
     }
@@ -130,7 +139,6 @@ public class MainActivity extends AppCompatActivity {
         int id = item.getItemId();
 
         if (id == R.id.refresh) {
-            appStructs.clear();
             Log.d(TAG, "onOptionsItemSelected: After clear: " + appStructs.size());
             try {
                 updateAppStructs();
@@ -138,12 +146,8 @@ public class MainActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
             Log.d(TAG, "onOptionsItemSelected: After update: " + appStructs.size());
-            Collections.sort(appStructs);
-            Log.d(TAG, "onOptionsItemSelected: After sort: " + appStructs.size());
-            mAdapter.notifyDataSetChanged();
-            Log.d(TAG, "onOptionsItemSelected: After notify: " + appStructs.size());
         } else if (id == R.id.doThey) {
-//            appStructs.clear();
+            appStructs.clear();
             mAdapter.notifyDataSetChanged();
 //            final ViewGroup viewGroup = (ViewGroup) ((ViewGroup) this.findViewById(android.R.id.content)).getChildAt(0);
 //            showInputDialog();
