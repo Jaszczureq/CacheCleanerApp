@@ -19,6 +19,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -38,7 +39,9 @@ public class MainActivity extends AppCompatActivity {
     private RecyclerView mRecyclerView;
     private RecyclerView.Adapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
-    int i=0;
+    private ProgressBar progressBar;
+    int i = 0;
+    private int progressStatus = 0;
 
     List<Adres> adresy;
     List<AppStruct> appStructs;
@@ -55,6 +58,7 @@ public class MainActivity extends AppCompatActivity {
         adresy = new LinkedList<>();
         appStructs = new LinkedList<>();
         infos = new LinkedList<>();
+        progressBar = (ProgressBar) findViewById(R.id.progressBar);
 
         mRecyclerView = (RecyclerView) findViewById(R.id.recyclerView);
         Log.d(TAG, "onCreate: After recyclerView init");
@@ -77,10 +81,16 @@ public class MainActivity extends AppCompatActivity {
         try {
             Method getPackageSizeInfo = pm.getClass().getMethod(
                     "getPackageSizeInfo", String.class, IPackageStatsObserver.class);
+            progressStatus = 0;
+
+            progressBar.setProgress(progressStatus);
+//            while (progressStatus < infos.size()) {
+//                progressBar.setProgress(progressStatus);
             for (final ResolveInfo inf : infos) {
                 getPackageSizeInfo.invoke(pm, inf.activityInfo.packageName, new IPackageStatsObserver.Stub() {
                     @Override
                     public void onGetStatsCompleted(PackageStats pStats, boolean succeeded) {
+
                         AppStruct app = new AppStruct();
                         app.cacheSize = pStats.cacheSize;
                         app.info = inf;
@@ -88,15 +98,20 @@ public class MainActivity extends AppCompatActivity {
                             Log.d(TAG, "onGetStatsCompleted: After add");
                             appStructs.add(app);
                         }
-                        if(i>=infos.size()){
-                            Log.d(TAG, "onGetStatsCompleted: Notified all "+i);
+                        if (i >= infos.size()) {
+                            Log.d(TAG, "onGetStatsCompleted: Notified all " + i);
                             notifyAll();
                         }
                         i++;
+                        progressStatus++;
                     }
+
                 });
             }
-//            wait();
+            wait(2000);
+//                Thread.sleep(200);
+//            }
+
         } catch (NoSuchMethodException | SecurityException | IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
             Log.e(TAG, "updateAppStructs: ", e);
         }
@@ -116,25 +131,17 @@ public class MainActivity extends AppCompatActivity {
 
         if (id == R.id.refresh) {
             appStructs.clear();
-            Log.d(TAG, "onOptionsItemSelected: After clear: "+appStructs.size());
+            Log.d(TAG, "onOptionsItemSelected: After clear: " + appStructs.size());
             try {
                 updateAppStructs();
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            while(i<34){
-                try {
-                    wait(1);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-            i=0;
-            Log.d(TAG, "onOptionsItemSelected: After update: "+appStructs.size());
+            Log.d(TAG, "onOptionsItemSelected: After update: " + appStructs.size());
             Collections.sort(appStructs);
-            Log.d(TAG, "onOptionsItemSelected: After sort: "+appStructs.size());
+            Log.d(TAG, "onOptionsItemSelected: After sort: " + appStructs.size());
             mAdapter.notifyDataSetChanged();
-            Log.d(TAG, "onOptionsItemSelected: After notify: "+appStructs.size());
+            Log.d(TAG, "onOptionsItemSelected: After notify: " + appStructs.size());
         } else if (id == R.id.doThey) {
 //            appStructs.clear();
             mAdapter.notifyDataSetChanged();
