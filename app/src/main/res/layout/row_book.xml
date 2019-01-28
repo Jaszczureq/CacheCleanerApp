@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- A RecyclerView with some commonly used attributes -->
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:tools="http://schemas.android.com/tools"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/row_titleMargin"
+                android:paddingBottom="@dimen/row_padding"
+                android:paddingLeft="@dimen/row_padding"
+                android:paddingRight="@dimen/row_padding"
+                android:paddingTop="@dimen/row_padding">
+
+    <ImageView
+            android:id="@+id/img_thumbnail"
+            android:layout_width="@dimen/img_width"
+            android:layout_height="@dimen/img_height"
+            android:layout_marginLeft="@dimen/row_padding"
+            android:layout_alignParentLeft="true"
+            android:layout_centerVertical="true"
+            android:scaleType="centerInside"
+    />
+
+    <TextView
+            android:id="@+id/text_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/row_padding"
+            android:layout_toRightOf="@+id/img_thumbnail"
+            android:layout_alignTop="@+id/img_thumbnail"
+    />
+    <TextView
+            android:id="@+id/text_author"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/row_padding"
+            android:layout_toRightOf="@+id/text_title"
+            android:layout_alignTop="@+id/text_title"
+    />
+
+
+</RelativeLayout>
