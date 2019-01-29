@@ -81,11 +81,9 @@ public class MainActivity extends AppCompatActivity {
         mLayoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(mLayoutManager);
         mRecyclerView.setAdapter(mAdapter);
-        try {
-            updateAppStructs();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+
+        updateAppStructs();
+
         //region onSwipe
 //        mRecyclerView.setOnTouchListener(new OnSwipeTouchListener(getApplicationContext()) {
 //            @Override
@@ -114,7 +112,7 @@ public class MainActivity extends AppCompatActivity {
         mRecyclerView.addOnItemTouchListener(new MyTouchListener(getApplicationContext(), mRecyclerView, new MyTouchListener.OnTouchActionListener() {
             @Override
             public void onLeftSwipe(View view, int position) {
-                Intent intent=new Intent(MainActivity.this, Main2Activity.class);
+                Intent intent = new Intent(MainActivity.this, Main2Activity.class);
                 startActivity(intent);
                 MainActivity.this.finish();
 //                new Handler().postDelayed(new Runnable() {
@@ -137,7 +135,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view, int position) {
                 List<AppStruct> items = ((RecyclerVievAdapted) mAdapter).getList();
-                AppStruct item=items.get(position);
+                AppStruct item = items.get(position);
                 Toast.makeText(getApplicationContext(), "Number of clicked row: " + position, Toast.LENGTH_SHORT).show();
                 String packageName = item.info.activityInfo.packageName;
                 Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.fromParts("package", packageName, null));
@@ -151,39 +149,32 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        showToast("onResume");
-        try {
-            updateAppStructs();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+//        showToast("onResume");
+        updateAppStructs();
     }
 
     @Override
     protected void onRestart() {
         super.onRestart();
-        showToast("onRestart");
+//        showToast("onRestart");
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        showToast("onDestroy");
+//        showToast("onDestroy");
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        showToast("onPause");
+//        showToast("onPause");
     }
 
     @SuppressLint("StaticFieldLeak")
-    private synchronized void updateAppStructs() throws InterruptedException {
-//        runOnUiThread(new Runnable() {
-//            @Override
-//            public void run() {
+    private synchronized void updateAppStructs() {
         progressBar.setMax(infos.size());
-        new AsyncTask<Void,Void,String>(){
+        new AsyncTask<Void, Void, String>() {
             @Override
             protected String doInBackground(Void... voids) {
 //                return null;
@@ -221,8 +212,6 @@ public class MainActivity extends AppCompatActivity {
                         Thread.sleep(10);
                     }
                     i = 0;
-                    Collections.sort(appStructs);
-//                    mAdapter.notifyDataSetChanged();
 
 
                 } catch (NoSuchMethodException | SecurityException | IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
@@ -236,15 +225,12 @@ public class MainActivity extends AppCompatActivity {
             @Override
             protected void onPostExecute(String s) {
                 super.onPostExecute(s);
+                Collections.sort(appStructs);
                 mAdapter.notifyDataSetChanged();
                 Log.d(TAG, "onPostExecute: Finished");
             }
         }.execute();
 
-//            }
-//
-//        });
-        Collections.sort(appStructs);
         Log.d(TAG, "updateAppStructs: ");
     }
 
@@ -260,17 +246,18 @@ public class MainActivity extends AppCompatActivity {
 
         if (id == R.id.refresh) {
             Log.d(TAG, "onOptionsItemSelected: After clear: " + appStructs.size());
-            try {
-                updateAppStructs();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            Log.d(TAG, "onOptionsItemSelected: After update: " + appStructs.size());
+            updateAppStructs();
         } else if (id == R.id.doThey) {
             appStructs.clear();
             mAdapter.notifyDataSetChanged();
 //            final ViewGroup viewGroup = (ViewGroup) ((ViewGroup) this.findViewById(android.R.id.content)).getChildAt(0);
 //            showInputDialog();
+        } else if (id == R.id.trash) {
+            showToast(getResources().getString(R.string.remove_cache));
+            Intent intent = new Intent(Settings.ACTION_INTERNAL_STORAGE_SETTINGS);
+            intent.addCategory(Intent.CATEGORY_DEFAULT);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            getApplicationContext().startActivity(intent);
         }
         return true;
     }

@@ -12,19 +12,21 @@
     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
               android:text="@string/placeholder"
               android:id="@+id/row_title"
-              android:layout_toRightOf="@+id/row_image"
-              android:textColor="#000"
-              android:layout_centerVertical="true"
-              android:layout_marginLeft="@dimen/row_titleMargin"
-              android:textSize="@dimen/row_textSize"/>
-
-    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-              android:text="@string/placeholder"
-              android:id="@+id/row_author"
-              android:layout_toEndOf="@+id/row_title"
+              android:layout_toEndOf="@+id/row_image"
               android:textColor="#000"
               android:layout_centerVertical="true"
               android:layout_marginStart="@dimen/row_titleMargin"
-              android:textSize="@dimen/row_textSize"/>
+              android:textSize="@dimen/row_textSize"
+              android:maxLines="1"/>
+
+    <TextView android:layout_width="60dp" android:layout_height="wrap_content"
+              android:text="@string/placeholder"
+              android:id="@+id/row_author"
+              android:textColor="#000"
+              android:layout_centerVertical="true"
+              android:layout_alignParentEnd="true"
+              android:layout_marginStart="@dimen/row_titleMargin"
+              android:textSize="@dimen/row_textSize"
+              android:maxLines="1"/>
 
 </RelativeLayout>

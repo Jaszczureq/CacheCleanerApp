@@ -4,4 +4,7 @@
     <string name="refresh_title">Refresh content</string>
     <string name="doThey">Clear the list</string>
     <string name="title_activity_main2">Main2Activity</string>
+    <string name="trash">Trash</string>
+    <string name="options">Options</string>
+    <string name="remove_cache">Choose "Internal shared storage" and "Cached data"</string>
 </resources>
