@@ -8,6 +8,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageStats;
 import android.content.pm.ResolveInfo;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -43,6 +44,8 @@ public class MainActivity extends AppCompatActivity {
     int i = 0;
     private int progressStatus = 0;
 
+    int SPLASH_DISPLAY_TIME=10;
+
     List<Adres> adresy;
     List<AppStruct> appStructs;
     List<ResolveInfo> infos;
@@ -51,6 +54,7 @@ public class MainActivity extends AppCompatActivity {
     final private String BASE_URL = "https://887361cc.ngrok.io/api/";
 //    final private String BASE_URL = "http://localhost:8080/api/";
 
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -71,7 +75,24 @@ public class MainActivity extends AppCompatActivity {
         mLayoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(mLayoutManager);
         mRecyclerView.setAdapter(mAdapter);
-
+        mRecyclerView.setOnTouchListener(new OnSwipeTouchListener(getApplicationContext()) {
+            @Override
+            public void onSwipeLeft() {
+                super.onSwipeLeft();
+                showToast("Swipe Left detected");
+//                System.out.println("SMTH");
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        Intent intent = new Intent(MainActivity.this, SecondActivity.class);
+                        intent.putExtra("id", "1");
+                        startActivity(intent);
+                        MainActivity.this.finish();
+//                        overridePendingTransition(R.anim.fadein, R.anim.fadeout);
+                    }
+                }, SPLASH_DISPLAY_TIME);
+            }
+        });
     }
 
     private synchronized void updateAppStructs() throws InterruptedException {
