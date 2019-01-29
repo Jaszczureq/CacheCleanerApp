@@ -21,10 +21,10 @@
     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
               android:text="@string/placeholder"
               android:id="@+id/row_author"
-              android:layout_toRightOf="@+id/row_title"
+              android:layout_toEndOf="@+id/row_title"
               android:textColor="#000"
               android:layout_centerVertical="true"
-              android:layout_marginLeft="@dimen/row_titleMargin"
+              android:layout_marginStart="@dimen/row_titleMargin"
               android:textSize="@dimen/row_textSize"/>
 
 </RelativeLayout>

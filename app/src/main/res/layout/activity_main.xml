@@ -3,26 +3,29 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
                 xmlns:tools="http://schemas.android.com/tools"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent">
-
-    <android.support.v7.widget.RecyclerView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:id="@+id/recyclerView"
-            android:scrollbars="vertical"/>
+                android:layout_height="match_parent"
+                android:id="@+id/relativeLayout">
 
     <ProgressBar
             android:id="@+id/progressBar"
             style="?android:attr/progressBarStyleHorizontal"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
             android:layout_alignParentTop="true"
+            android:foregroundGravity="top"
             android:indeterminate="false"
             android:max="100"
-            android:minHeight="50dp"
+            android:minHeight="10dp"
             android:minWidth="200dp"
             android:progress="0"/>
+
+    <android.support.v7.widget.RecyclerView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/recyclerView"
+            android:scrollbars="vertical"
+    android:foregroundGravity="center"/>
 
 
 </RelativeLayout>

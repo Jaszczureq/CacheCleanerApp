@@ -7,8 +7,11 @@ import android.content.pm.IPackageStatsObserver;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageStats;
 import android.content.pm.ResolveInfo;
+import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -21,6 +24,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -41,10 +45,11 @@ public class MainActivity extends AppCompatActivity {
     private RecyclerView.Adapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
     private ProgressBar progressBar;
+    private RelativeLayout relativeLayout;
     int i = 0;
     private int progressStatus = 0;
 
-    int SPLASH_DISPLAY_TIME=10;
+    int SPLASH_DISPLAY_TIME = 1000;
 
     List<Adres> adresy;
     List<AppStruct> appStructs;
@@ -63,6 +68,7 @@ public class MainActivity extends AppCompatActivity {
         appStructs = new LinkedList<>();
         infos = new LinkedList<>();
         progressBar = (ProgressBar) findViewById(R.id.progressBar);
+        relativeLayout = (RelativeLayout) findViewById(R.id.relativeLayout);
 
         mRecyclerView = (RecyclerView) findViewById(R.id.recyclerView);
         Log.d(TAG, "onCreate: After recyclerView init");
@@ -75,39 +81,121 @@ public class MainActivity extends AppCompatActivity {
         mLayoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(mLayoutManager);
         mRecyclerView.setAdapter(mAdapter);
-        mRecyclerView.setOnTouchListener(new OnSwipeTouchListener(getApplicationContext()) {
+        try {
+            updateAppStructs();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        //region onSwipe
+//        mRecyclerView.setOnTouchListener(new OnSwipeTouchListener(getApplicationContext()) {
+//            @Override
+//            public void onSwipeLeft() {
+//                super.onSwipeLeft();
+//                showToast("Swipe Left detected");
+////                System.out.println("SMTH");
+////                new Handler().postDelayed(new Runnable() {
+////                    @Override
+////                    public void run() {
+////                        Intent intent = new Intent(MainActivity.this, Main2Activity.class);
+//////                        intent.putExtra("id", "1");
+////                        startActivity(intent);
+////                        MainActivity.this.finish();
+////                        overridePendingTransition(R.anim.fadein, R.anim.fadeout);
+////                    }
+////                }, SPLASH_DISPLAY_TIME);
+////                Intent intent=new Intent(MainActivity.this, Main2Activity.class);
+////                startActivity(intent);
+////                MainActivity.this.finish();
+//            }
+//
+//        });
+        //endregion
+
+        mRecyclerView.addOnItemTouchListener(new MyTouchListener(getApplicationContext(), mRecyclerView, new MyTouchListener.OnTouchActionListener() {
             @Override
-            public void onSwipeLeft() {
-                super.onSwipeLeft();
-                showToast("Swipe Left detected");
-//                System.out.println("SMTH");
-                new Handler().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        Intent intent = new Intent(MainActivity.this, SecondActivity.class);
-                        intent.putExtra("id", "1");
-                        startActivity(intent);
-                        MainActivity.this.finish();
+            public void onLeftSwipe(View view, int position) {
+                Intent intent=new Intent(MainActivity.this, Main2Activity.class);
+                startActivity(intent);
+                MainActivity.this.finish();
+//                new Handler().postDelayed(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        Intent intent = new Intent(MainActivity.this, Main2Activity.class);
+////                        intent.putExtra("id", "1");
+//                        startActivity(intent);
+//                        MainActivity.this.finish();
 //                        overridePendingTransition(R.anim.fadein, R.anim.fadeout);
-                    }
-                }, SPLASH_DISPLAY_TIME);
+//                    }
+//                }, SPLASH_DISPLAY_TIME);
             }
-        });
+
+            @Override
+            public void onRightSwipe(View view, int position) {
+
+            }
+
+            @Override
+            public void onClick(View view, int position) {
+                List<AppStruct> items = ((RecyclerVievAdapted) mAdapter).getList();
+                AppStruct item=items.get(position);
+                Toast.makeText(getApplicationContext(), "Number of clicked row: " + position, Toast.LENGTH_SHORT).show();
+                String packageName = item.info.activityInfo.packageName;
+                Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.fromParts("package", packageName, null));
+                intent.addCategory(Intent.CATEGORY_DEFAULT);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                getApplicationContext().startActivity(intent);
+            }
+        }));
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        showToast("onResume");
+        try {
+            updateAppStructs();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        showToast("onRestart");
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        showToast("onDestroy");
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        showToast("onPause");
+    }
+
+    @SuppressLint("StaticFieldLeak")
     private synchronized void updateAppStructs() throws InterruptedException {
-        runOnUiThread(new Runnable() {
+//        runOnUiThread(new Runnable() {
+//            @Override
+//            public void run() {
+        progressBar.setMax(infos.size());
+        new AsyncTask<Void,Void,String>(){
             @Override
-            public void run() {
+            protected String doInBackground(Void... voids) {
+//                return null;
                 appStructs.clear();
                 PackageManager pm = getPackageManager();
                 try {
                     Method getPackageSizeInfo = pm.getClass().getMethod(
                             "getPackageSizeInfo", String.class, IPackageStatsObserver.class);
-                    progressStatus = 0;
 
-//                    progressBar.setProgress(progressStatus);
+                    progressStatus = 0;
                     progressBar.setProgress(progressStatus);
+
                     for (final ResolveInfo inf : infos) {
                         getPackageSizeInfo.invoke(pm, inf.activityInfo.packageName, new IPackageStatsObserver.Stub() {
                             @Override
@@ -125,6 +213,7 @@ public class MainActivity extends AppCompatActivity {
                                     Log.d(TAG, "onGetStatsCompleted: Notified all " + i);
                                 }
                                 progressStatus++;
+                                progressBar.setProgress(progressStatus);
                             }
                         });
                     }
@@ -133,7 +222,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                     i = 0;
                     Collections.sort(appStructs);
-                    mAdapter.notifyDataSetChanged();
+//                    mAdapter.notifyDataSetChanged();
 
 
                 } catch (NoSuchMethodException | SecurityException | IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
@@ -141,10 +230,20 @@ public class MainActivity extends AppCompatActivity {
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-
+                return null;
             }
 
-        });
+            @Override
+            protected void onPostExecute(String s) {
+                super.onPostExecute(s);
+                mAdapter.notifyDataSetChanged();
+                Log.d(TAG, "onPostExecute: Finished");
+            }
+        }.execute();
+
+//            }
+//
+//        });
         Collections.sort(appStructs);
         Log.d(TAG, "updateAppStructs: ");
     }

@@ -73,17 +73,21 @@ public class RecyclerVievAdapted extends RecyclerView.Adapter<RecyclerVievAdapte
         holder.row_author.setText(s);
         holder.row_title.setText(item.info.loadLabel(pm));
         holder.row_image.setImageDrawable(item.info.loadIcon(pm));
-        holder.itemView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Toast.makeText(mContext, "Number of clicked row: " + position, Toast.LENGTH_SHORT).show();
-                String packageName = item.info.activityInfo.packageName;
-                Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.fromParts("package", packageName, null));
-                intent.addCategory(Intent.CATEGORY_DEFAULT);
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                mContext.startActivity(intent);
-            }
-        });
+//        holder.itemView.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                Toast.makeText(mContext, "Number of clicked row: " + position, Toast.LENGTH_SHORT).show();
+//                String packageName = item.info.activityInfo.packageName;
+//                Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.fromParts("package", packageName, null));
+//                intent.addCategory(Intent.CATEGORY_DEFAULT);
+//                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//                mContext.startActivity(intent);
+//            }
+//        });
+    }
+
+    public List<AppStruct> getList() {
+        return list;
     }
 
     @Override
