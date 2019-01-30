@@ -11,20 +11,14 @@ import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import java.lang.reflect.Method;
 import java.util.List;
 
 public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.ViewHolder> {
-    private static final String TAG = "RecyclerViewAdapter";
 
     private List<String> list;
-    private Context mContext;
-    private Method getPackageSizeInfo;
 
-    public RecyclerViewAdapter(List<String> list, Context mContext) {
-        Log.d(TAG, "RecyclerViewAdapter: Constructor");
+    public RecyclerViewAdapter(List<String> list) {
         this.list = list;
-        this.mContext = mContext;
     }
 
     @NonNull
@@ -56,16 +50,12 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         holder.row_cache.setText(temp[2]);
     }
 
-    public List<String> getList() {
-        return list;
-    }
-
     @Override
     public int getItemCount() {
         return list.size();
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder {
+    class ViewHolder extends RecyclerView.ViewHolder {
 
 
         TextView row_id;
@@ -75,7 +65,6 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
         ViewHolder(@NonNull View itemView) {
             super(itemView);
-            Log.d(TAG, "ViewHolder: Contructor called");
 
             row_id = itemView.findViewById(R.id.row_id);
             row_uuid = itemView.findViewById(R.id.row_uuid);

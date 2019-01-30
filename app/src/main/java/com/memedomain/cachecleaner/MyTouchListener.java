@@ -24,8 +24,8 @@ public class MyTouchListener implements RecyclerView.OnItemTouchListener {
         void onClick(View view, int position);
     }
 
-    public MyTouchListener(Context context, final RecyclerView recyclerView,
-                           OnTouchActionListener onTouchActionListener) {
+    MyTouchListener(Context context, final RecyclerView recyclerView,
+                    OnTouchActionListener onTouchActionListener) {
 
         mOnTouchActionListener = onTouchActionListener;
         mGestureDetector = new GestureDetectorCompat(context, new GestureDetector.SimpleOnGestureListener() {
@@ -53,16 +53,16 @@ public class MyTouchListener implements RecyclerView.OnItemTouchListener {
 
                     if (e1.getX() - e2.getX() > SWIPE_MIN_DISTANCE && Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {
 
-                        if (mOnTouchActionListener != null && child != null) {
+                        if (mOnTouchActionListener != null) {
                             mOnTouchActionListener.onLeftSwipe(child, childPosition);
                         }
 
                     } else if (e2.getX() - e1.getX() > SWIPE_MIN_DISTANCE && Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {
-                        if (mOnTouchActionListener != null && child != null) {
+                        if (mOnTouchActionListener != null) {
                             mOnTouchActionListener.onRightSwipe(child, childPosition);
                         }
                     }
-                } catch (Exception e) {
+                } catch (Exception ignored) {
                 }
 
                 return false;

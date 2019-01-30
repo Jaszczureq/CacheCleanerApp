@@ -1,17 +1,22 @@
 <resources>
-    <string name="app_name">My Cache Cleaner2</string>
-    <string name="placeholder">Placeholder</string>
+    <string name="app_name" translatable="false">My Cache Cleaner</string>
+    <string name="placeholder" translatable="false">Placeholder</string>
     <string name="refresh_title">Refresh content</string>
     <string name="doThey">Clear the list</string>
-    <string name="title_activity_main2">Main2Activity</string>
+    <string name="title_activity_main2" translatable="false">My Cache Cleaner</string>
     <string name="trash">Trash</string>
     <string name="options">Options</string>
     <string name="remove_cache">Choose "Internal shared storage" and "Cached data"</string>
     <string name="except_one">Sensor not supported</string>
     <string name="except_two">Accelerometer not supported</string>
-    <string name="textView">Screen Locked</string>
+    <string name="textView">Rotation locked</string>
     <string name="settings">Settings</string>
     <string name="dialogTitle">Settings</string>
     <string name="done">Done</string>
     <string name="pref_file_key">myUUID</string>
+    <plurals name="number_of_apps">
+        <item quantity="one">Found %d app</item>
+        <item quantity="other">Found $d apps</item>
+    </plurals>
+    <string name="swipe">Swipe Down</string>
 </resources>

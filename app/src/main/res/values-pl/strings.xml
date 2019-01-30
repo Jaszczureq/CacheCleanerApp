@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">My Cache Cleaner</string>
+    <string name="refresh_title">Odświerz zawartość</string>
+    <string name="doThey">Wyczyść listę</string>
+    <string name="trash">Kosz</string>
+    <string name="options">Opcja</string>
+    <string name="remove_cache">Wybierz Pamięć wewnętrzna, a następnie Dane pamięci podręcznej</string>
+    <string name="except_one">Czujnik nie wspierany</string>
+    <string name="except_two">Akcelerometr nie wspierany</string>
+    <string name="textView">Rotacja zablokowana</string>
+    <string name="settings">Ustawienia</string>
+    <string name="dialogTitle">Ustawienia</string>
+    <string name="done">Gotowe</string>
+    <string name="pref_file_key">myUUID</string>
+    <plurals name="number_of_apps">
+        <item quantity="one">Znaleziono %d aplikację</item>
+        <item quantity="few">Znaleziono %d aplikacje</item>
+        <item quantity="many">Znaleziono %d aplikacji</item>
+    </plurals>
+    <string name="swipe">Przeciągnij w dół</string>
+</resources>

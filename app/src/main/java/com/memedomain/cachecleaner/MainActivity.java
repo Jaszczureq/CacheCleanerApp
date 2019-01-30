@@ -1,12 +1,15 @@
 package com.memedomain.cachecleaner;
 
-import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.*;
+import android.content.pm.ActivityInfo;
+import android.content.pm.IPackageStatsObserver;
+import android.content.pm.PackageManager;
+import android.content.pm.PackageStats;
+import android.graphics.drawable.Drawable;
 import android.hardware.SensorListener;
 import android.hardware.SensorManager;
 import android.net.Uri;
@@ -15,14 +18,11 @@ import android.os.Bundle;
 import android.os.Vibrator;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -30,7 +30,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.ProgressBar;
-import android.widget.RelativeLayout;
 import android.widget.Toast;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -40,10 +39,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Collections;
-import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
@@ -51,25 +47,24 @@ public class MainActivity extends AppCompatActivity {
     private SwipeRefreshLayout swipeContainer;
     private RecyclerView mRecyclerView;
     private RecyclerView.Adapter mAdapter;
-    private RecyclerView.LayoutManager mLayoutManager;
     private ProgressBar progressBar;
-    private RelativeLayout relativeLayout;
     private MyTouchListener mTouch;
     private int i = 0;
     private boolean checked = false;
+    volatile boolean ready = false;
     private int progressStatus = 0;
+
+    public ArrayList<PackageInfoStruct> res;
 
     private String uuid;
 
-    int SPLASH_DISPLAY_TIME = 1000;
     private ShakeListener mShaker;
 
     private List<AppStruct> appStructs;
-    private List<ResolveInfo> infos;
+    private List<PackageInfoStruct> infos;
 
     private Toast toastObject;
-    final static public String BASE_URL = "https://1c605919.ngrok.io/api/";
-//    final private String BASE_URL = "http://localhost:8080/api/";
+    final static String BASE_URL = "http://42ba8897.ngrok.io/api/";
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
@@ -78,20 +73,21 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         SharedPreferences shared = this.getPreferences(Context.MODE_PRIVATE);
+//        uuid = shared.getString(getString(R.string.pref_file_key), null);
         if (!shared.contains(getString(R.string.pref_file_key))) {
             uuid = String.valueOf(new Date().hashCode());
-            Log.d(TAG, "onCreate: setHash: " + uuid);
             SharedPreferences.Editor editor = shared.edit();
             editor.putString(getString(R.string.pref_file_key), uuid);
             editor.apply();
         } else {
             uuid = shared.getString(getString(R.string.pref_file_key), null);
-            Log.d(TAG, "onCreate: getHash: " + uuid);
         }
-
 
         initTouch();
         sensorManager();
+
+//        showToast(getResources().getString(R.string.swipe));
+
     }
 
     private void sensorManager() {
@@ -101,8 +97,8 @@ public class MainActivity extends AppCompatActivity {
         mShaker.setOnShakeListener(new ShakeListener.OnShakeListener() {
             @Override
             public void onShake() {
+                assert vibrator != null;
                 vibrator.vibrate(100);
-                showToast("Shake detected");
                 trash_em_all();
             }
         });
@@ -112,26 +108,27 @@ public class MainActivity extends AppCompatActivity {
 
         appStructs = new LinkedList<>();
         infos = new LinkedList<>();
-        progressBar = (ProgressBar) findViewById(R.id.progressBar);
-//        relativeLayout = (RelativeLayout) findViewById(R.id.relativeLayout);
+        progressBar = findViewById(R.id.progressBar);
 
-        mRecyclerView = (RecyclerView) findViewById(R.id.recyclerView);
-        Log.d(TAG, "onCreate: After recyclerView init");
+        AppDetails cAppDetails = new AppDetails(this);
+        infos = cAppDetails.getPackages();
+
+        mRecyclerView = findViewById(R.id.recyclerView);
         Intent mainIntent = new Intent(Intent.ACTION_MAIN, null);
         mainIntent.addCategory(Intent.CATEGORY_LAUNCHER);
-        infos = getPackageManager().queryIntentActivities(mainIntent, 0);
-//        showToast("Number of apps: " + infos.size());
+//        infos = getPackageManager().queryIntentActivities(mainIntent, 0);
 
         appStructs.clear();
         mAdapter = new RecyclerVievAdapted(appStructs, MainActivity.this);
         mRecyclerView.setAdapter(mAdapter);
-        mLayoutManager = new LinearLayoutManager(this);
+        RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(mLayoutManager);
 
-        swipeContainer = (SwipeRefreshLayout) findViewById(R.id.swipeContainer);
+        swipeContainer = findViewById(R.id.swipeContainer);
         swipeContainer.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
+                Log.d(TAG, "onRefresh: updateAppStructs");
                 updateAppStructs();
             }
         });
@@ -140,6 +137,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onLeftSwipe(View view, int position) {
                 Intent intent = new Intent(MainActivity.this, Main2Activity.class);
+                intent.putExtra("key", uuid);
                 startActivity(intent);
                 MainActivity.this.finish();
                 overridePendingTransition(R.anim.fadein_left, R.anim.fadeout_left);
@@ -154,62 +152,41 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view, int position) {
                 List<AppStruct> items = ((RecyclerVievAdapted) mAdapter).getList();
                 AppStruct item = items.get(position);
-                Toast.makeText(getApplicationContext(), "Number of clicked row: " + position, Toast.LENGTH_SHORT).show();
-                String packageName = item.info.activityInfo.packageName;
+//                String packageName = item.info.activityInfo.packageName;
+                String packageName = item.pName;
                 Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.fromParts("package", packageName, null));
                 intent.addCategory(Intent.CATEGORY_DEFAULT);
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 getApplicationContext().startActivity(intent);
             }
         });
-        int permissionCheck = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE);
-
-//        if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
-//            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_PHONE_STATE}, );
-//        } else {
-//            //TODO
-//        }
-//
-//        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
-//            // TODO: Consider calling
-//            //    ActivityCompat#requestPermissions
-//            // here to request the missing permissions, and then overriding
-//            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-//            //                                          int[] grantResults)
-//            // to handle the case where the user grants the permission. See the documentation
-//            // for ActivityCompat#requestPermissions for more details.
-//            return;
-//        }
-//        TelephonyManager telephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
-//        String id = android.telephony.TelephonyManager.getDeviceId();
-//        showToast(getDeviceIMEI());
     }
 
     @Override
     protected void onResume() {
         mShaker.resume();
-        super.onResume();
+//        if (ready){
+            Log.d(TAG, "onResume: updateAppStructs");
         updateAppStructs();
-//        showToast("onResume");
+//    }
+        ready = true;
+        super.onResume();
     }
 
     @Override
     protected void onPause() {
         mShaker.pause();
         super.onPause();
-//        showToast("onPause");
     }
 
     @Override
     protected void onRestart() {
         super.onRestart();
-//        showToast("onRestart");
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-//        showToast("onDestroy");
     }
 
     @SuppressLint("StaticFieldLeak")
@@ -229,20 +206,21 @@ public class MainActivity extends AppCompatActivity {
                     progressStatus = 0;
                     progressBar.setProgress(progressStatus);
 
-                    for (final ResolveInfo inf : infos) {
-                        getPackageSizeInfo.invoke(pm, inf.activityInfo.packageName, new IPackageStatsObserver.Stub() {
+                    for (final PackageInfoStruct inf : infos) {
+                        getPackageSizeInfo.invoke(pm, inf.pname, new IPackageStatsObserver.Stub() {
                             @Override
                             public void onGetStatsCompleted(PackageStats pStats, boolean succeeded) {
 
                                 i++;
                                 AppStruct app = new AppStruct();
                                 app.cacheSize = pStats.cacheSize;
-                                app.info = inf;
+                                app.icon = inf.icon;
+                                app.appName = inf.appname;
+                                app.pName = inf.pname;
                                 if (pStats.cacheSize > 0) {
                                     appStructs.add(app);
                                 }
-                                if (i >= infos.size()) {
-                                }
+                                infos.size();
                                 progressStatus++;
                                 progressBar.setProgress(progressStatus);
                             }
@@ -268,6 +246,7 @@ public class MainActivity extends AppCompatActivity {
                 Collections.sort(appStructs);
                 mAdapter.notifyDataSetChanged();
                 mRecyclerView.addOnItemTouchListener(mTouch);
+                showToast(getResources().getQuantityString(R.plurals.number_of_apps, appStructs.size(), appStructs.size()));
             }
         }.execute();
 
@@ -285,15 +264,22 @@ public class MainActivity extends AppCompatActivity {
 
         switch (id) {
             case R.id.refresh:
+                Log.d(TAG, "onOptionsItemSelected: updateAppStructs");
                 updateAppStructs();
+                break;
             case R.id.doThey:
                 appStructs.clear();
                 mAdapter.notifyDataSetChanged();
                 mRecyclerView.removeOnItemTouchListener(mTouch);
+                break;
             case R.id.trash:
                 trash_em_all();
+                break;
             case R.id.settings:
                 showInputDialog();
+                break;
+            default:
+                break;
         }
         return true;
     }
@@ -301,8 +287,6 @@ public class MainActivity extends AppCompatActivity {
     private void trash_em_all() {
         showToast(getResources().getString(R.string.remove_cache));
 
-        String macAddress = android.provider.Settings.Secure.getString(getApplicationContext().getContentResolver(), "bluetooth_address");
-        Log.d(TAG, "trash_em_all: " + macAddress);
         long temp = 0;
         for (AppStruct app : appStructs) {
             temp += app.cacheSize;
@@ -325,7 +309,6 @@ public class MainActivity extends AppCompatActivity {
         input.setChecked(checked);
 
         dialogBuilder.setTitle(R.string.dialogTitle);
-//        dialogBuilder.setMessage("Some message");
         dialogBuilder.setPositiveButton(R.string.done, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
@@ -353,16 +336,10 @@ public class MainActivity extends AppCompatActivity {
         call.enqueue(new Callback<Sala>() {
             @Override
             public void onResponse(Call<Sala> call, Response<Sala> response) {
-                if (!response.isSuccessful()) {
-                    Log.d(TAG, "onResponse: Code: " + response.message());
-                    return;
-                }
-                Log.d(TAG, "onResponse: Positive " + response.body().getId());
             }
 
             @Override
             public void onFailure(Call<Sala> call, Throwable t) {
-                Log.d(TAG, "onFailure: " + t.getMessage());
             }
         });
     }
@@ -384,7 +361,10 @@ public class MainActivity extends AppCompatActivity {
 }
 
 class AppStruct implements Comparable<AppStruct> {
-    ResolveInfo info;
+    //    ResolveInfo info;
+    String pName;
+    String appName;
+    Drawable icon;
     long cacheSize;
 
     @Override
@@ -411,7 +391,7 @@ class ShakeListener implements SensorListener {
     private long mLastForce;
 
     public interface OnShakeListener {
-        public void onShake();
+        void onShake();
     }
 
     ShakeListener(Context context) {

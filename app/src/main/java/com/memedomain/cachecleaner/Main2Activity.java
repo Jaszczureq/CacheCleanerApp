@@ -3,6 +3,7 @@ package com.memedomain.cachecleaner;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Vibrator;
 import android.support.constraint.ConstraintLayout;
@@ -27,37 +28,36 @@ public class Main2Activity extends AppCompatActivity {
     ConstraintLayout constraintLayout;
     private static final String TAG = "Main2Activity";
     private ShakeListener mShaker;
-    private RecyclerView mRecyclerView;
     private RecyclerView.Adapter mAdapter;
-    private RecyclerView.LayoutManager mLayoutManager;
 
     private List<String> strings;
+    private String uuid;
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main2);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        strings=new LinkedList<>();
+        strings = new LinkedList<>();
+        Intent intent=getIntent();
 
-        mRecyclerView = (RecyclerView) findViewById(R.id.recyclerView2);
-        mAdapter = new RecyclerViewAdapter(strings, Main2Activity.this);
+        uuid=intent.getExtras().getString("key");
+
+        RecyclerView mRecyclerView = findViewById(R.id.recyclerView2);
+        mAdapter = new RecyclerViewAdapter(strings);
         mRecyclerView.setAdapter(mAdapter);
-        mLayoutManager = new LinearLayoutManager(this);
+        RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(mLayoutManager);
 
-//        constraintLayout = (ConstraintLayout) findViewById(R.id.constraintLayout);
         getSalas();
         sensorManager();
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
             }
         });
         fab.hide();
@@ -98,7 +98,8 @@ public class Main2Activity extends AppCompatActivity {
                 }
                 for (Sala sala : response.body()) {
                     String temp = sala.getId() + "," + sala.getRodzaj() + "," + sala.getWielkosc();
-                    strings.add(temp);
+                    if (sala.getRodzaj().equals(uuid))
+                        strings.add(temp);
                 }
                 if (!strings.isEmpty())
                     Log.d(TAG, "onResponse: Positive " + strings.get(0));
