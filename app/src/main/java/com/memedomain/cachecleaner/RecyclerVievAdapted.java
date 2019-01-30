@@ -14,10 +14,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
-import android.widget.Toast;
+import android.widget.*;
 
 import java.lang.reflect.Method;
 import java.util.List;
@@ -42,6 +39,7 @@ public class RecyclerVievAdapted extends RecyclerView.Adapter<RecyclerVievAdapte
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         Log.d(TAG, "onCreateViewHolder: called");
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.layout_row, parent, false);
+//        ProgressBar progressBar = (ProgressBar) findViewById(R.id.progressBar);
 
         pm = mContext.getPackageManager();
         try {
@@ -73,17 +71,6 @@ public class RecyclerVievAdapted extends RecyclerView.Adapter<RecyclerVievAdapte
         holder.row_author.setText(s);
         holder.row_title.setText(item.info.loadLabel(pm));
         holder.row_image.setImageDrawable(item.info.loadIcon(pm));
-//        holder.itemView.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                Toast.makeText(mContext, "Number of clicked row: " + position, Toast.LENGTH_SHORT).show();
-//                String packageName = item.info.activityInfo.packageName;
-//                Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.fromParts("package", packageName, null));
-//                intent.addCategory(Intent.CATEGORY_DEFAULT);
-//                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-//                mContext.startActivity(intent);
-//            }
-//        });
     }
 
     public List<AppStruct> getList() {
@@ -106,8 +93,6 @@ public class RecyclerVievAdapted extends RecyclerView.Adapter<RecyclerVievAdapte
         ViewHolder(@NonNull View itemView) {
             super(itemView);
             Log.d(TAG, "ViewHolder: Contructor called");
-
-//            itemView.setOnClickListener(this);
 
             row_image = itemView.findViewById(R.id.row_image);
             row_title = itemView.findViewById(R.id.row_title);

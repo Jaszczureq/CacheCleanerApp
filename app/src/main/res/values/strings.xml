@@ -7,4 +7,6 @@
     <string name="trash">Trash</string>
     <string name="options">Options</string>
     <string name="remove_cache">Choose "Internal shared storage" and "Cached data"</string>
+    <string name="except_one">Sensor not supported</string>
+    <string name="except_two">Accelerometer not supported</string>
 </resources>

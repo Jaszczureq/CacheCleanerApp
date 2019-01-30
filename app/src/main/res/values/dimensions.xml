@@ -5,4 +5,8 @@
     <dimen name="row_titleMargin">30dp</dimen>
     <dimen name="row_textSize">17sp</dimen>
     <dimen name="row_padding">15dp</dimen>
+    <dimen name="fab_margin">16dp</dimen>
+    <dimen name="XDelta_neg_100">-100%p</dimen>
+    <dimen name="XDelta_zero">0</dimen>
+    <dimen name="XDelta_pos_100">100%p</dimen>
 </resources>

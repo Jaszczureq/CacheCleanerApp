@@ -8,7 +8,7 @@ import android.view.MotionEvent;
 import android.view.View;
 
 public class MyTouchListener implements RecyclerView.OnItemTouchListener {
-    /*Change these as per your need*/
+
     private static final int SWIPE_MIN_DISTANCE = 120;
     private static final int SWIPE_THRESHOLD_VELOCITY = 200;
     private static final int SWIPE_MAX_OFF_PATH = 250;
@@ -16,12 +16,12 @@ public class MyTouchListener implements RecyclerView.OnItemTouchListener {
     private OnTouchActionListener mOnTouchActionListener;
     private GestureDetectorCompat mGestureDetector;
 
-    public static interface OnTouchActionListener {
-        public void onLeftSwipe(View view, int position);
+    public interface OnTouchActionListener {
+        void onLeftSwipe(View view, int position);
 
-        public void onRightSwipe(View view, int position);
+        void onRightSwipe(View view, int position);
 
-        public void onClick(View view, int position);
+        void onClick(View view, int position);
     }
 
     public MyTouchListener(Context context, final RecyclerView recyclerView,
@@ -32,7 +32,7 @@ public class MyTouchListener implements RecyclerView.OnItemTouchListener {
 
             @Override
             public boolean onSingleTapConfirmed(MotionEvent e) {
-                // Find the item view that was swiped based on the coordinates
+
                 View child = recyclerView.findChildViewUnder(e.getX(), e.getY());
                 int childPosition = recyclerView.getChildPosition(child);
                 mOnTouchActionListener.onClick(child, childPosition);
@@ -48,11 +48,9 @@ public class MyTouchListener implements RecyclerView.OnItemTouchListener {
                         return false;
                     }
 
-                    // Find the item view that was swiped based on the coordinates
                     View child = recyclerView.findChildViewUnder(e1.getX(), e1.getY());
                     int childPosition = recyclerView.getChildPosition(child);
 
-                    // right to left swipe
                     if (e1.getX() - e2.getX() > SWIPE_MIN_DISTANCE && Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {
 
                         if (mOnTouchActionListener != null && child != null) {
@@ -65,7 +63,6 @@ public class MyTouchListener implements RecyclerView.OnItemTouchListener {
                         }
                     }
                 } catch (Exception e) {
-                    // nothing
                 }
 
                 return false;

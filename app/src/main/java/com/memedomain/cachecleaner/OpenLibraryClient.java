@@ -13,12 +13,12 @@ public interface OpenLibraryClient {
     @Headers({"Accept: application/json", "Authorization: Bearer " + KEY})
     @GET("adres")
     Call<List<Adres>> getAdreses();
-
-    @Headers({"Accept: application/json", "Authorization: Bearer " + KEY})
-    @GET("lekarzs")
-    Call<List<Lekarz>> getLekarzs();
-
-    @Headers({"Accept: application/json", "Authorization: Bearer " + KEY})
-    @GET("pacjents")
-    Call<List<Pacjent>> getPacjents();
+//
+//    @Headers({"Accept: application/json", "Authorization: Bearer " + KEY})
+//    @GET("lekarzs")
+//    Call<List<Lekarz>> getLekarzs();
+//
+//    @Headers({"Accept: application/json", "Authorization: Bearer " + KEY})
+//    @GET("pacjents")
+//    Call<List<Pacjent>> getPacjents();
 }

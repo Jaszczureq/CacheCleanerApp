@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<set xmlns:android="http://schemas.android.com/apk/res/android">
+    <translate
+            android:fromXDelta="@dimen/XDelta_neg_100"
+            android:toXDelta="@dimen/XDelta_zero"
+            android:duration="@android:integer/config_mediumAnimTime"
+    />
+
+</set>

@@ -24,25 +24,6 @@ public class Main2Activity extends AppCompatActivity {
         constraintLayout=(ConstraintLayout)findViewById(R.id.constraintLayout);
 
         constraintLayout.setOnTouchListener(new OnSwipeTouchListener(getApplicationContext()) {
-//            @Override
-//            public void onSwipeLeft() {
-//                super.onSwipeLeft();
-////                showToast("Swipe Left detected");
-////                System.out.println("SMTH");
-////                new Handler().postDelayed(new Runnable() {
-////                    @Override
-////                    public void run() {
-////                        Intent intent = new Intent(MainActivity.this, Main2Activity.class);
-//////                        intent.putExtra("id", "1");
-////                        startActivity(intent);
-////                        MainActivity.this.finish();
-////                        overridePendingTransition(R.anim.fadein, R.anim.fadeout);
-////                    }
-////                }, SPLASH_DISPLAY_TIME);
-//                Intent intent=new Intent(Main2Activity.this, MainActivity.class);
-//                startActivity(intent);
-//                Main2Activity.this.finish();
-//            }
 
             @Override
             public void onSwipeRight() {
@@ -50,6 +31,7 @@ public class Main2Activity extends AppCompatActivity {
                 Intent intent=new Intent(Main2Activity.this, MainActivity.class);
                 startActivity(intent);
                 Main2Activity.this.finish();
+                overridePendingTransition(R.anim.fadein_right, R.anim.fadeout_right);
             }
         });
 
