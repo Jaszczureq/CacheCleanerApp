@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="@dimen/row_padding"
+                android:id="@+id/parent_layout">
+
+    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+              android:text="@string/placeholder"
+              android:id="@+id/row_id"
+              android:textColor="#000"
+              android:layout_centerVertical="true"
+              android:layout_marginStart="@dimen/row_titleMargin"
+              android:textSize="@dimen/row_textSize"
+              android:maxLines="1"/>
+
+    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+              android:text="@string/placeholder"
+              android:id="@+id/row_uuid"
+              android:layout_toEndOf="@+id/row_id"
+              android:textColor="#000"
+              android:layout_centerVertical="true"
+              android:layout_marginStart="@dimen/row_titleMargin"
+              android:textSize="@dimen/row_textSize"
+              android:maxLines="1"/>
+
+    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+              android:text="@string/placeholder"
+              android:id="@+id/row_cache"
+              android:layout_toEndOf="@+id/row_uuid"
+              android:textColor="#000"
+              android:layout_centerVertical="true"
+              android:layout_marginStart="@dimen/row_titleMargin"
+              android:textSize="@dimen/row_textSize"
+              android:maxLines="1"/>
+
+</RelativeLayout>

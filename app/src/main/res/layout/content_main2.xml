@@ -10,4 +10,10 @@
         tools:context=".Main2Activity"
         android:id="@+id/constraintLayout">
 
+    <android.support.v7.widget.RecyclerView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/recyclerView2"
+            android:scrollbars="vertical"
+            android:foregroundGravity="center"/>
 </android.support.constraint.ConstraintLayout>

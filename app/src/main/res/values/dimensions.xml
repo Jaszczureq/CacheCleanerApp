@@ -9,4 +9,5 @@
     <dimen name="XDelta_neg_100">-100%p</dimen>
     <dimen name="XDelta_zero">0</dimen>
     <dimen name="XDelta_pos_100">100%p</dimen>
+    <dimen name="textSize">20dp</dimen>
 </resources>
